@@ -438,6 +438,7 @@ class Login(Resource):
         if user:
             if user.check_password(password):
                 session['user_id'] = user.id
+                print(session, user.id)
                 return make_response(jsonify(user.to_dict()), HTTP_SUCCESS)
             
         return {'error': 'Invalid Username or Password'}, HTTP_UNAUTHORIZED
