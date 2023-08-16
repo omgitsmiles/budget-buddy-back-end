@@ -452,7 +452,7 @@ class Login(Resource):
                 print('token created')
                 #add token as cookie to response
                 response = make_response(jsonify(user.to_dict()), HTTP_SUCCESS)
-                print('response created')
+                print(token)
                 response.set_cookie('token', token, httponly=True, secure=True, samesite='None')
                 print('cookie added')
                 return response
