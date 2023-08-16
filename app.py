@@ -130,7 +130,7 @@ class Users(Resource):
 api.add_resource(Users, '/users', '/users/<int:user_id>')
 
 class Budgets(Resource):
-    @authorized
+    # @authorized
     def get(self, budget_id):       
         #gets budget with provided ID 
         print(session)
