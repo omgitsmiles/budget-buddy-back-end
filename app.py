@@ -6,6 +6,8 @@ from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
 import os
 from functools import wraps
+import jwt
+from datetime import datetime, timedelta
 
 load_dotenv()
 
@@ -40,11 +42,17 @@ HTTP_SERVER_ERROR = 500
 def authorized(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        print(session)
-        #checks session to ensure user is logged in 
-        if not session.get('user_id'):
+        token = request.cookies.get('token')
+
+        try:
+            payload = jwt.decode(token, app.secret_key, algorithms=['HS256'])
+            user_id = payload.get('user_id')
+            if user_id is None:
+                return make_response(jsonify({'error': 'Not authorized'}), HTTP_UNAUTHORIZED)
+            return func(*args, **kwargs)
+        except (jwt.ExpiredSignatureError, jwt.DecodeError, jwt.InvalidTokenError):
             return make_response(jsonify({'error': 'Not authorized'}), HTTP_UNAUTHORIZED)
-        return func(*args, **kwargs)
+
     return wrapper
 
 class Users(Resource):
@@ -130,18 +138,13 @@ class Users(Resource):
 api.add_resource(Users, '/users', '/users/<int:user_id>')
 
 class Budgets(Resource):
-    # @authorized
+    @authorized
     def get(self, budget_id):       
         #gets budget with provided ID 
         print(session)
         budget = Budget.query.get(budget_id)
         if not budget:
             return make_response(jsonify({'error': 'Budget not found'}), HTTP_NOT_FOUND)
-        
-        # check if budget belongs to logged in user
-        # user = User.query.filter(User.id == session['user_id']).first()
-        # if budget.user != user:
-        #     return make_response(jsonify({'error': 'Not authorized to retrieve this budget'}), HTTP_UNAUTHORIZED)
         
         try:
             return make_response(jsonify(budget.to_dict()), HTTP_SUCCESS)
@@ -439,9 +442,13 @@ class Login(Resource):
 
         if user:
             if user.check_password(password):
-                session['user_id'] = user.id
-                print(session, user.id)
-                return make_response(jsonify(user.to_dict()), HTTP_SUCCESS)
+                #generate token with expiration time
+                expiration_time = datetime.utcnow() + timedelta(hours=24)
+                payload = {'user_id': user.id, 'exp': expiration_time}
+                token = jwt.encode(payload, app.secret_key, algorithm='HS256')
+                #add token as cookie to response
+                response = make_response(jsonify(user.to_dict()), HTTP_SUCCESS)
+                response.set_cookie('token', token, httponly=True, secure=True, samesite='None; Secure')
             
         return {'error': 'Invalid Username or Password'}, HTTP_UNAUTHORIZED
 
@@ -449,19 +456,27 @@ api.add_resource(Login, '/login')
 
 class Logout(Resource):
     def delete(self):
-        session['user_id'] = None
-        return make_response({}, HTTP_NO_CONTENT)
+        response = make_response({}, HTTP_NO_CONTENT)
+        response.delete_cookie('token')  # Remove the token cookie
+        return response
 
 api.add_resource(Logout, '/logout')
 
 class CheckSession(Resource):
     def get(self):
-        #checks session for user_id for auto-login
-        if session.get('user_id'):
-            user = User.query.filter(User.id == session['user_id']).first()
-            return make_response(jsonify(user.to_dict()), HTTP_SUCCESS)
-        return {'error': '401 Unauthroized'}, HTTP_UNAUTHORIZED
-    
+        token = request.cookies.get('token')
+
+        try:
+            payload = jwt.decode(token, app.secret_key, algorithms=['HS256'])
+            user_id = payload['user_id']
+            if user_id:
+                user = User.query.filter(User.id == user_id).first()
+                return make_response(jsonify(user.to_dict()), HTTP_SUCCESS)
+        except (jwt.ExpiredSignatureError, jwt.DecodeError, jwt.InvalidTokenError):
+            pass
+
+        return {'error': '401 Unauthorized'}, HTTP_UNAUTHORIZED
+
 api.add_resource(CheckSession, '/check_session')
 
 if __name__ == '__main__':
