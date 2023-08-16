@@ -16,7 +16,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///budget-buddy.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
 
-allowed_origin = "https://main.df1j5bqqzyj4b.amplifyapp.com/"
+allowed_origin = "https://main.df1j5bqqzyj4b.amplifyapp.com"
 CORS(app, origins=allowed_origin)
 
 migrate = Migrate(app, db)
