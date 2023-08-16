@@ -442,6 +442,7 @@ class Login(Resource):
 
         if user:
             if user.check_password(password):
+                print("user auth successful")
                 #generate token with expiration time
                 expiration_time = datetime.utcnow() + timedelta(hours=24)
                 payload = {'user_id': user.id, 'exp': expiration_time}
