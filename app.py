@@ -139,9 +139,9 @@ class Budgets(Resource):
             return make_response(jsonify({'error': 'Budget not found'}), HTTP_NOT_FOUND)
         
         # check if budget belongs to logged in user
-        user = User.query.filter(User.id == session['user_id']).first()
-        if budget.user != user:
-            return make_response(jsonify({'error': 'Not authorized to retrieve this budget'}), HTTP_UNAUTHORIZED)
+        # user = User.query.filter(User.id == session['user_id']).first()
+        # if budget.user != user:
+        #     return make_response(jsonify({'error': 'Not authorized to retrieve this budget'}), HTTP_UNAUTHORIZED)
         
         try:
             return make_response(jsonify(budget.to_dict()), HTTP_SUCCESS)
