@@ -40,6 +40,7 @@ HTTP_SERVER_ERROR = 500
 def authorized(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
+        print(session)
         #checks session to ensure user is logged in 
         if not session.get('user_id'):
             return make_response(jsonify({'error': 'Not authorized'}), HTTP_UNAUTHORIZED)
