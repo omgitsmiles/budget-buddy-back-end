@@ -132,6 +132,7 @@ class Budgets(Resource):
     @authorized
     def get(self, budget_id):       
         #gets budget with provided ID 
+        print(session)
         budget = Budget.query.get(budget_id)
         if not budget:
             return make_response(jsonify({'error': 'Budget not found'}), HTTP_NOT_FOUND)
