@@ -445,11 +445,17 @@ class Login(Resource):
                 print("user auth successful")
                 #generate token with expiration time
                 expiration_time = datetime.utcnow() + timedelta(hours=24)
+                print('expiration time created')
                 payload = {'user_id': user.id, 'exp': expiration_time}
+                print('payload created ')
                 token = jwt.encode(payload, app.secret_key, algorithm='HS256')
+                print('token created')
                 #add token as cookie to response
                 response = make_response(jsonify(user.to_dict()), HTTP_SUCCESS)
+                print('response created')
                 response.set_cookie('token', token, httponly=True, secure=True, samesite='None')
+                print('cookie added')
+                return response
             
         return {'error': 'Invalid Username or Password'}, HTTP_UNAUTHORIZED
 
