@@ -17,7 +17,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
 
 allowed_origin = "https://main.df1j5bqqzyj4b.amplifyapp.com"
-CORS(app, origins=allowed_origin)
+CORS(app, origins=allowed_origin, supports_credentials=True)
 
 migrate = Migrate(app, db)
 db.init_app(app)
