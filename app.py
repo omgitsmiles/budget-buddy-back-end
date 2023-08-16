@@ -15,7 +15,10 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///budget-buddy.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
-CORS(app)
+
+allowed_origin = "https://main.df1j5bqqzyj4b.amplifyapp.com/"
+CORS(app, origins=allowed_origin)
+
 migrate = Migrate(app, db)
 db.init_app(app)
 bcrypt = Bcrypt(app)
