@@ -448,7 +448,7 @@ class Login(Resource):
                 token = jwt.encode(payload, app.secret_key, algorithm='HS256')
                 #add token as cookie to response
                 response = make_response(jsonify(user.to_dict()), HTTP_SUCCESS)
-                response.set_cookie('token', token, httponly=True, secure=True, samesite='None; Secure')
+                response.set_cookie('token', token, httponly=True, secure=True, samesite='None')
             
         return {'error': 'Invalid Username or Password'}, HTTP_UNAUTHORIZED
 
