@@ -14,6 +14,7 @@ from models import db, User, Budget, Income, Category, Expense
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///budget-buddy.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SESSION_COOKIE_PATH'] = '/'
 app.json.compact = False
 
 allowed_origin = "https://main.df1j5bqqzyj4b.amplifyapp.com"
